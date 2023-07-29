@@ -1,0 +1,46 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+#    url: jdbc:mysql://10.99.66.77:3307/test?characterEncoding=utf-8&amp;useSSL=false&amp;autoReconnect=true&amp;useUnicode=true&amp;zeroDateTimeBehavior=convertToNull&rewriteBatchedStatements=true&queryTimeout=30000
+    url: jdbc:mysql://localhost/req
+    username: root
+    password: root
+    #当前数据源操作类型
+    type: com.alibaba.druid.pool.DruidDataSource
+    #以下省略druid的监控的一些配置。
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password: root
+
+
+#匹配sql语句的映射文件的位置，classpat代表在resources下
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  #以下两个配置可以省略，然后在mapper映射文件中配置也是可以的。
+  #使用type-aliases-package中指定entity扫描包类让mybatis自定扫描到自定义的entity
+  type-aliases-package: com.example.entity
+  configuration.map-underscore-to-camel-case: true
+  # 开启驼峰uName自动映射到u_name
+
+
+ip:
+  pool:
+    url: http://zltiqu.pyhttp.taolop.com/getip?count=1&neek=16224&type=1&yys=0&port=1&sb=&mr=1&sep=1
+    percent: 0.3
+
+
+#限流窗口时间
+window:
+  limit:
+    #一小时内
+    time: 3600
+    #不能超过3000次
+    count: 3000
+
+#请求超时时间30s
+req:
+  timeout: 30000
+
