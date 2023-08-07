@@ -11,13 +11,13 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.InetSocketAddress;
-import java.net.Proxy;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -43,6 +43,8 @@ public class RestClient {
     private IPPool ipPool;
     @Autowired
     private RestTemplate restTemplate;
+    @Autowired
+    private RestTemplate nonRedirectTemplate;
 
     private final static int PROCESSOR_COUNT = Runtime.getRuntime().availableProcessors();
 
@@ -52,17 +54,17 @@ public class RestClient {
 
     public ResponseEntity doExchange(ReqParam param, RestTemplate restTemplate) {
         List<String> cookieList = param.getCookieList();
-        HttpHeaders headers = new HttpHeaders();
+        HttpHeaders headers = param.init();
         if (!CollectionUtils.isEmpty(cookieList)) {
             cookieList.forEach(cookie -> {
                 headers.add(HttpHeaders.COOKIE, cookie);
             });
         }
-        String jsonBody = param.getJsonBody();
+        String jsonBody = param.getData();
         Object parse = JSONObject.parse(jsonBody);
         HttpEntity<Object> entity = new HttpEntity<>(parse, headers);
         try {
-            HttpMethod method = HttpMethod.valueOf(param.getMethod().toUpperCase());
+            HttpMethod method = param.getMethod() == 0 ? HttpMethod.GET : HttpMethod.POST;
             return restTemplate.exchange(param.getUrl(), method, entity, String.class);
         } catch (Exception e) {
             log.error("请求发送失败，url:{}，error：{}", param.getUrl(), e.getMessage());
@@ -71,11 +73,13 @@ public class RestClient {
     }
 
     public RestTemplate getRestTemplate(ReqParam param) {
+        RestTemplate template = param.getIsRedirects() ? restTemplate : nonRedirectTemplate;
         if (!param.getProxyFlag()) {
-            return restTemplate;
+            return template;
         }
         String proxy = ipPool.getProxy(param.getDeleteFlag());
-        return proxyTemplate(proxy);
+        proxyTemplate(template, proxy);
+        return template;
     }
 
     public <T> ResponseEntity<T> exchange(ReqParam param) {
@@ -92,11 +96,19 @@ public class RestClient {
 
     }
 
-    public RestTemplate proxyTemplate(String proxy) {
-        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+    public void proxyTemplate(RestTemplate restTemplate, String proxy) {
         String[] proxys = proxy.split(":");
-        factory.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxys[0], Integer.parseInt(proxys[1]))));
-        return new RestTemplate(factory);
+
+        ClientHttpRequestFactory clientHttpRequestFactory = new SimpleClientHttpRequestFactory() {
+            @Override
+            protected void prepareConnection(java.net.HttpURLConnection connection, String httpMethod) throws IOException {
+                super.prepareConnection(connection, httpMethod);
+                // Set proxy properties
+                connection.setRequestProperty("http.proxyHost", proxys[0]);
+                connection.setRequestProperty("http.proxyPort", String.valueOf(proxys[1]));
+            }
+        };
+        restTemplate.setRequestFactory(clientHttpRequestFactory);
     }
 
 }

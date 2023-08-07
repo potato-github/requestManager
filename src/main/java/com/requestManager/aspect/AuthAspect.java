@@ -40,7 +40,7 @@ public class AuthAspect {
     private RedisService redisService;
 
 
-    @Pointcut("execution(* com.requestManager.data.request.*Controller.*(..))" +
+    @Pointcut("execution(* com.requestManager.controller.*.*(..))" +
             "|| execution(* com.requestManager.data.user.LoginController.loginOut(..))" +
             "|| execution(* com.requestManager.data.user.LoginController.modifyPwd(..))")
     public void authCheck() {
@@ -51,14 +51,13 @@ public class AuthAspect {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
         String authCookie = null;
-        if (StringUtils.isEmpty(authCookie)) {
+        StringUtils.isEmpty(authCookie);
 
-            Cookie[] cookies = request.getCookies();
-            if (Objects.nonNull(cookies)) {
-                for (Cookie cookie : cookies) {
-                    if (StringUtils.equals(cookie.getName(), Constant.AUTH_TOKEN)) {
-                        authCookie = cookie.getValue();
-                    }
+        Cookie[] cookies = request.getCookies();
+        if (Objects.nonNull(cookies)) {
+            for (Cookie cookie : cookies) {
+                if (StringUtils.equals(cookie.getName(), Constant.AUTH_TOKEN)) {
+                    authCookie = cookie.getValue();
                 }
             }
         }

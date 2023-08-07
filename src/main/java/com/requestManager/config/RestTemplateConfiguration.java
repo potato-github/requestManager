@@ -12,10 +12,15 @@ import org.apache.http.ssl.SSLContexts;
 import org.apache.http.ssl.TrustStrategy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -59,5 +64,19 @@ public class RestTemplateConfiguration {
         return factory;
     }
 
+    // 禁用重定向
+    @Bean
+    public RestTemplate nonRedirectTemplate() {
+        // Create a custom ClientHttpRequestFactory to disable redirects
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory() {
+            @Override
+            protected void prepareConnection(java.net.HttpURLConnection connection, String httpMethod) throws IOException {
+                super.prepareConnection(connection, httpMethod);
+                // Disable redirects
+                connection.setInstanceFollowRedirects(false);
+            }
+        };
+        return new RestTemplate(factory);
+    }
 
 }

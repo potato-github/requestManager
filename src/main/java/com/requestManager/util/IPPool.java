@@ -8,6 +8,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -60,6 +61,11 @@ public class IPPool implements ApplicationListener<ApplicationReadyEvent> {
         return queue.peek();
     }
 
+    public void clear() {
+        queue.clear();
+        totalSize = 0;
+    }
+
     public String getProxy(boolean isDelete) {
         String proxy = isDelete ? poll() : peek();
         if (size.get() <= percent * totalSize) {
@@ -85,6 +91,7 @@ public class IPPool implements ApplicationListener<ApplicationReadyEvent> {
             String body = response.getBody();
             assert body != null;
             String[] ips = body.split("\r\n");
+            clear();
             Arrays.stream(ips).forEach(this::offer);
             totalSize = ips.length;
             log.info("[IPPool] init success, size:{}", totalSize);
@@ -93,7 +100,13 @@ public class IPPool implements ApplicationListener<ApplicationReadyEvent> {
         } finally {
             initFlag.compareAndSet(Boolean.TRUE, Boolean.FALSE);
         }
+    }
 
+    // 每2分钟刷新一次proxy
+    @Scheduled(cron = "0 */2 * * * ?")
+    public void scheduled() {
+        System.out.println(System.currentTimeMillis());
+        initProxy();
     }
 
 
