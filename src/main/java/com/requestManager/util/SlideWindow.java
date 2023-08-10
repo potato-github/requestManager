@@ -1,5 +1,6 @@
 package com.requestManager.util;
 
+import com.requestManager.data.user.User;
 import lombok.Data;
 
 import java.util.HashMap;
@@ -23,8 +24,8 @@ public class SlideWindow {
     private int limitCount;
     private int limitTimeSecond;
 
-    public SlideWindow(Long userId, String url, int limitCount, int limitTimeSecond) {
-        this.key = userId + url;
+    public SlideWindow(User user, String url, int limitCount, int limitTimeSecond) {
+        this.key = user.getId() + url;
         this.limitCount = limitCount;
         this.limitTimeSecond = limitTimeSecond;
         countMap.put(key, new AtomicLong(0L));

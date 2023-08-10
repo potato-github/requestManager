@@ -12,4 +12,5 @@ import lombok.Data;
 public class LoginReq {
     private String password;
     private String name;
+    private int level = 1;
 }

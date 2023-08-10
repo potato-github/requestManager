@@ -34,7 +34,7 @@ public class LoginService {
     private RedisService redisService;
 
     public void register(LoginReq req) {
-        User userReq = User.builder().name(req.getName()).password(req.getPassword()).build();
+        User userReq = User.builder().name(req.getName()).password(req.getPassword()).level(req.getLevel()).build();
         User user = userMapper.queryByName(userReq);
         if (!Objects.isNull(user)) {
             throw new BusinessException(ErrorCodeEnum.USER_DUPLICATE_ERROR);

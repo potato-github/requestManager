@@ -19,4 +19,6 @@ public class User {
     private Long id;
     private String password;
     private String name;
+    // 0-无次数限制，默认是1，1小时可访问100次
+    private int level = 1;
 }

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -60,9 +61,8 @@ public class RestClient {
                 headers.add(HttpHeaders.COOKIE, cookie);
             });
         }
-        String jsonBody = param.getData();
-        Object parse = JSONObject.parse(jsonBody);
-        HttpEntity<Object> entity = new HttpEntity<>(parse, headers);
+        Object jsonBody = param.getData();
+        HttpEntity<Object> entity = new HttpEntity<>(jsonBody, headers);
         try {
             HttpMethod method = param.getMethod() == 0 ? HttpMethod.GET : HttpMethod.POST;
             return restTemplate.exchange(param.getUrl(), method, entity, String.class);

@@ -1,6 +1,7 @@
 package com.requestManager.data.request;
 
 import com.requestManager.aspect.UserThreadLocal;
+import com.requestManager.config.UserLevelConfig;
 import com.requestManager.constant.BusinessException;
 import com.requestManager.constant.ErrorCodeEnum;
 import com.requestManager.data.user.User;
@@ -28,13 +29,14 @@ public class ReqService {
     private int limitTimeSecond;
     @Autowired
     private RestClient client;
+    @Autowired
+    private UserLevelConfig levelConfig;
 
 
     // 获取body
     public ReqResponse exchange(ReqParam reqParam) {
         User user = UserThreadLocal.getUser();
-        Long id = user.getId();
-        SlideWindow slideWindow = new SlideWindow(id, reqParam.getUrl(), limitCount, limitTimeSecond);
+        SlideWindow slideWindow = new SlideWindow(user, reqParam.getUrl(), levelConfig.getLimitCount(user.getLevel()), limitTimeSecond);
         if (!slideWindow.canOpr()) {
             throw new BusinessException(ErrorCodeEnum.LIMIT_ERROR, user.getName());
         }

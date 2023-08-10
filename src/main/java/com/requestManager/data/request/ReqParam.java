@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -25,7 +26,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ReqParam {
     private String url;
-    private String data;
+    private Object data;
     private int method;
     // 0-普通json，1-base64，2-json格式，3-表单格式
     private int type;
@@ -34,6 +35,7 @@ public class ReqParam {
     private Boolean deleteFlag = false;
     private String header;
     private Boolean isRedirects;
+    private MediaType mediaType;
 
     public HttpHeaders init() {
         HttpHeaders headers = new HttpHeaders();
@@ -54,6 +56,7 @@ public class ReqParam {
             }
             i++;
         }
+        headers.setContentType(mediaType);
         return headers;
     }
 

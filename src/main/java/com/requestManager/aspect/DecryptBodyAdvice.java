@@ -1,9 +1,7 @@
 package com.requestManager.aspect;
 
 import com.alibaba.fastjson.JSONObject;
-import com.requestManager.data.request.ReqParam;
 import com.requestManager.util.AesCBC;
-import com.requestManager.util.Base64Util;
 import lombok.SneakyThrows;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
@@ -18,11 +16,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 @ControllerAdvice
 public class DecryptBodyAdvice implements RequestBodyAdvice {
@@ -73,45 +67,7 @@ public class DecryptBodyAdvice implements RequestBodyAdvice {
     private String analyzeParam(String decrypt) throws UnsupportedEncodingException {
         JSONObject jsonObject = JSONObject.parseObject(decrypt);
         Object data = jsonObject.get("data");
-        String jsonString = data.toString().replaceAll("^\"|\"$", "");
-        ReqParam reqParam = JSONObject.parseObject(jsonString, ReqParam.class);
-        int type = reqParam.getType();
-        String jsonBody = reqParam.getData();
-        switch (type) {
-            case 0:
-                jsonBody = URLDecoder.decode(jsonBody, "UTF-8");
-                String[] split = jsonBody.split("&");
-                Map<String, String> map = new HashMap<>();
-                Arrays.stream(split).forEach(req -> {
-                    String[] split1 = req.split("=");
-                    if (split1.length == 0) {
-                        return;
-                    }
-                    map.put(split1[0], split1[1]);
-                });
-                jsonBody = JSONObject.toJSONString(map);
-                break;
-            case 1:
-                jsonBody = Base64Util.decode(jsonBody);
-                break;
-            case 2:
-
-                break;
-            case 3:
-                split = jsonBody.split("&");
-                map = new HashMap<>();
-                Arrays.stream(split).forEach(req -> {
-                    String[] split1 = req.split("=");
-                    if (split1.length == 0) {
-                        return;
-                    }
-                    map.put(split1[0], split1[1]);
-                });
-                jsonBody = JSONObject.toJSONString(map);
-                break;
-        }
-        reqParam.setData(jsonBody);
-        return JSONObject.toJSONString(reqParam);
+        return data.toString().replaceAll("^\"|\"$", "");
     }
 
     @Override

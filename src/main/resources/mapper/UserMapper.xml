@@ -14,15 +14,18 @@
             <if test="password != null and password != ''">
                 and password = #{password}
             </if>
+            <if test="level != null and level != ''">
+                and level = #{level}
+            </if>
             limit 1
         </where>
     </select>
 
     <insert id="insert" parameterType="com.requestManager.data.user.User">
         insert into user
-        (name, password)
+        (name, password, level)
         value
-        (#{name}, #{password})
+        (#{name}, #{password}, #{level})
     </insert>
 
     <update id="update" parameterType="com.requestManager.data.user.User">
