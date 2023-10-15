@@ -7,6 +7,8 @@ import com.requestManager.data.request.ReqParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -36,7 +38,7 @@ import java.util.concurrent.TimeoutException;
  **/
 @Slf4j
 @Component
-public class RestClient {
+public class RestClient implements ApplicationListener<ApplicationReadyEvent> {
 
     @Value("${req.timeout}")
     private Long reqTimeOut;
@@ -50,7 +52,7 @@ public class RestClient {
     private final static int PROCESSOR_COUNT = Runtime.getRuntime().availableProcessors();
 
     private static ExecutorService executor =
-            new ThreadPoolExecutor(PROCESSOR_COUNT, PROCESSOR_COUNT * 5,
+            new ThreadPoolExecutor(0, PROCESSOR_COUNT * 5,
                     1, TimeUnit.MINUTES, new LinkedBlockingQueue<>(1000));
 
     public ResponseEntity doExchange(ReqParam param, RestTemplate restTemplate) {
@@ -83,16 +85,18 @@ public class RestClient {
     }
 
     public <T> ResponseEntity<T> exchange(ReqParam param) {
-        doExchange(param, getRestTemplate(param));
-        Future<ResponseEntity<T>> future = executor.submit(
+//        doExchange(param, getRestTemplate(param));
+        Future<ResponseEntity<T>> future = null;
+                executor.execute(
                 () -> doExchange(param, getRestTemplate(param)));
-        try {
-            ResponseEntity<T> response = future.get(reqTimeOut, TimeUnit.SECONDS);
-            return response;
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            log.error("请求发送失败，url:{}，error：{}", param.getUrl(), e.getMessage());
-            throw new BusinessException(ErrorCodeEnum.REQUEST_FAIL_ERROR, e.getMessage());
-        }
+//        try {
+//            ResponseEntity<T> response = future.get(reqTimeOut, TimeUnit.SECONDS);
+//            return response;
+//        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+//            log.error("请求发送失败，url:{}，error：{}", param.getUrl(), e.getMessage());
+//            throw new BusinessException(ErrorCodeEnum.REQUEST_FAIL_ERROR, e.getMessage());
+//        }
+        return null;
 
     }
 
@@ -111,4 +115,15 @@ public class RestClient {
         restTemplate.setRequestFactory(clientHttpRequestFactory);
     }
 
+    @Override
+    public void onApplicationEvent(ApplicationReadyEvent event) {
+//        executor.execute(() -> {
+//            try {
+//                Thread.sleep(100000000L);
+//            } catch (InterruptedException e) {
+//
+//            }
+//        });
+
+    }
 }

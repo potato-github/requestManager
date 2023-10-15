@@ -35,17 +35,17 @@ public class ReqService {
 
     // 获取body
     public ReqResponse exchange(ReqParam reqParam) {
-        User user = UserThreadLocal.getUser();
-        SlideWindow slideWindow = new SlideWindow(user, reqParam.getUrl(), levelConfig.getLimitCount(user.getLevel()), limitTimeSecond);
-        if (!slideWindow.canOpr()) {
-            throw new BusinessException(ErrorCodeEnum.LIMIT_ERROR, user.getName());
-        }
+//        User user = UserThreadLocal.getUser();
+//        SlideWindow slideWindow = new SlideWindow(user, reqParam.getUrl(), levelConfig.getLimitCount(user.getLevel()), limitTimeSecond);
+//        if (!slideWindow.canOpr()) {
+//            throw new BusinessException(ErrorCodeEnum.LIMIT_ERROR, user.getName());
+//        }
         // 执行
         ResponseEntity<Object> result = client.exchange(reqParam);
 
-        Object data = result.getBody();
-        List<String> cookie = result.getHeaders().get(HttpHeaders.SET_COOKIE);
-        ReqResponse response = ReqResponse.builder().data(data).cookie(cookie).build();
-        return response;
+//        Object data = result.getBody();
+//        List<String> cookie = result.getHeaders().get(HttpHeaders.SET_COOKIE);
+//        ReqResponse response = ReqResponse.builder().data(data).cookie(cookie).build();
+        return null;
     }
 }
